@@ -8,9 +8,9 @@
 ## Core Objectives
 
 ### Primary Goals (by priority)
-1. **Health-Focused** - Enable neck/eye movement during computer work to prevent RSI
-2. **Operational Convenience** - Support scenarios where hands are unavailable (teaching, streaming, mobile work)
-3. **Productivity Enhancement** - Faster input, better mood, reduced context switching
+1. **Productivity Enhancement** - Faster input, better mood, reduced context switching
+2. **Health-Focused** - Enable neck/eye movement during computer work to prevent RSI
+3. **Operational Convenience** - Support scenarios where hands are unavailable (teaching, streaming, mobile work)
 4. **Accessibility** - Multiple control modes for different user capabilities and contexts
 
 ### Target Users
@@ -36,10 +36,10 @@
 ## Feature Roadmap
 
 ### Stage 1: Core Operations (CURRENT)
-✅ Cursor movement via keyboard grid (36-cell vim-like)
-✅ Click (CapsLock tap)
-✅ Double-click (CapsLock double-tap)
-✅ Right-click (CapsLock+Shift)
+[ ] Cursor movement via keyboard grid (36-cell vim-like)
+[ ] Click (CapsLock tap)
+[ ] Double-click (CapsLock double-tap)
+[ ] Right-click (CapsLock+Shift)
 - [ ] Multi-monitor switching via head tracking
 
 ### Stage 2: Enhanced Control (mouseMaster-inspired)
