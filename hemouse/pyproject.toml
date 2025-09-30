@@ -1,0 +1,77 @@
+[project]
+name = "hemouse"
+version = "1.0.0"
+description = "Hands-Free Mouse Control - Keyboard-driven mouse control tool"
+authors = [
+    {name = "HEMouse Team", email = "dev@hemouse.dev"}
+]
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+keywords = ["mouse", "keyboard", "accessibility", "automation", "hint-mode"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Desktop Environment",
+    "Topic :: Utilities",
+]
+
+dependencies = [
+    "pywin32>=305",
+    "pywinauto>=0.6.8",
+    "pillow>=10.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pyinstaller>=6.0.0",
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/hemouse"
+Repository = "https://github.com/yourusername/hemouse"
+Documentation = "https://github.com/yourusername/hemouse/tree/main/docs"
+"Bug Tracker" = "https://github.com/yourusername/hemouse/issues"
+
+[project.scripts]
+hemouse = "main:main"
+
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
+include = '\.pyi?$'
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.uv]
+dev-dependencies = [
+    "pyinstaller>=6.0.0",
+    "pytest>=7.0.0",
+]
