@@ -1,0 +1,138 @@
+> 好的，按照你的阶段1安排,进行相关工作，包括 mvp 代码 
+
+● Bash(mkdir -p gaze_tracking_mvp/modules gaze_tracking_mvp/config)
+  ⎿  (No content)
+
+● Write(gaze_tracking_mvp\requirements.txt)
+  ⎿  Wrote 1 lines to ..\..\..\..\..\d\work2\projects\manshall\HEMouse\
+     I_created\gaze_tracking_mvp\requirements.txt
+     # Gaze Tracking MVP Dependencies
+     # Install with: pip install -r requirements.txt
+     opencv-python==4.8.1
+     mediapipe==0.10.9
+     numpy==1.24.3
+     screeninfo==0.8.1
+     pynput==1.7.6
+     pywin32>=305
+
+● Write(gaze_tracking_mvp\modules\__init__.py)
+  ⎿  Wrote 1 lines to ..\..\..\..\..\d\work2\projects\manshall\HEMouse\
+     I_created\gaze_tracking_mvp\modules\__init__.py
+     """
+     Gaze Tracking MVP Modules
+     """
+     __version__ = "1.0.0"
+
+● Write(gaze_tracking_mvp\modules\camera_manager.py)
+  ⎿  Wrote 1 lines to ..\..\..\..\..\d\work2\projects\manshall\HEMouse\
+     I_created\gaze_tracking_mvp\modules\camera_manager.py
+     """
+     Camera Manager - 摄像头管理模块
+     负责后台线程采集摄像头帧
+     """
+     import cv2
+     import threading
+     import queue
+     import time
+
+● Write(gaze_tracking_mvp\modules\pose_estimator.py)
+  ⎿  Wrote 1 lines to ..\..\..\..\..\d\work2\projects\manshall\HEMouse\
+     I_created\gaze_tracking_mvp\modules\pose_estimator.py
+     """
+     Pose Estimator - 头部姿态检测模块
+     使用MediaPipe Face Mesh进行面部检测和姿态估计
+     """
+     import cv2
+     import numpy as np
+     import mediapipe as mp
+
+● Write(gaze_tracking_mvp\modules\screen_calibrator.py)
+  ⎿  Wrote 1 lines to ..\..\..\..\..\d\work2\projects\manshall\HEMouse\
+     I_created\gaze_tracking_mvp\modules\screen_calibrator.py
+     """
+     Screen Calibrator - 屏幕校准和配置管理模块
+     负责检测屏幕布局、校准Yaw角度范围、判断目标屏幕
+     """
+     import json
+     import os
+     from screeninfo import get_monitors
+
+● Write(gaze_tracking_mvp\modules\window_activator.py)
+  ⎿  Wrote 1 lines to ..\..\..\..\..\d\work2\projects\manshall\HEMouse\
+     I_created\gaze_tracking_mvp\modules\window_activator.py
+     """
+     Window Activator - 窗口激活管理模块
+     负责获取屏幕窗口并激活（处理Windows前台限制）
+     """
+     import win32gui
+     import win32con
+     import win32api
+     from pynput.keyboard import Key, Controller
+     from screeninfo import get_monitors
+
+● Write(gaze_tracking_mvp\modules\gaze_tracker.py)
+  ⎿  Wrote 1 lines to ..\..\..\..\..\d\work2\projects\manshall\HEMouse\
+     I_created\gaze_tracking_mvp\modules\gaze_tracker.py
+     """
+     Gaze Tracker - 目光追踪主控制器
+     整合所有模块实现完整的目光追踪窗口激活功能
+     """
+     import threading
+     import time
+     from .camera_manager import CameraManager
+     from .pose_estimator import PoseEstimator
+     from .screen_calibrator import ScreenCalibrator
+
+● Write(gaze_tracking_mvp\gaze_tracker_standalone.py)
+  ⎿  Wrote 1 lines to ..\..\..\..\..\d\work2\projects\manshall\HEMouse\
+     I_created\gaze_tracking_mvp\gaze_tracker_standalone.py
+     """
+     Gaze Tracking MVP - Standalone Application
+     双屏目光追踪窗口自动激活 - 独立测试程序
+     Usage:
+         python gaze_tracker_standalone.py --calibrate  # 校准模式
+         python gaze_tracker_standalone.py --run        # 运行模式
+         python gaze_tracker_standalone.py --test       # 
+     测试模式（显示Yaw角度）
+         python gaze_tracker_standalone.py --info       # 显示配置信息
+     """
+
+● Write(gaze_tracking_mvp\README.md)
+  ⎿  Wrote 1 lines to ..\..\..\..\..\d\work2\projects\manshall\HEMouse\
+     I_created\gaze_tracking_mvp\README.md
+     # 🎯 Gaze Tracking MVP - Phase 1
+     **双屏目光追踪窗口自动激活 - 独立测试程序**
+     ## 📋 项目概述
+     这是HEMouse目光追踪功能的**阶段1独立MVP**，用于验证核心技术可行性。
+     ### 核心功能
+
+
+● Write(gaze_tracking_mvp\.gitignore)
+  ⎿  Wrote 1 lines to ..\..\..\..\..\d\work2\projects\manshall\HEMouse\
+     I_created\gaze_tracking_mvp\.gitignore
+     # Python
+     __pycache__/
+     *.py[cod]
+     *$py.class
+     *.so
+     .Python
+     *.egg-info/
+     dist/
+     build/
+  ⎿  API Error: 402 {"error":"Insufficient credits"}
+
+> go on 
+
+● Write(gaze_tracking_mvp\QUICKSTART.md)
+  ⎿  Wrote 1 lines to ..\..\..\..\..\d\work2\projects\manshall\HEMouse\
+     I_created\gaze_tracking_mvp\QUICKSTART.md
+     # 🚀 快速开始指南
+     **5分钟开始使用目光追踪MVP**
+     ---
+     ## ⚡ 极速启动（3步）
+     ### 1️⃣ 安装依赖（1分钟）
+  ⎿  API Error: 402 {"error":"Insufficient credits"}
+
+
+
+

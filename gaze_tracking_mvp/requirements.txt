@@ -1,0 +1,9 @@
+# Gaze Tracking MVP Dependencies
+# Install with: pip install -r requirements.txt
+
+opencv-python>=4.8.0,<4.11.0 
+mediapipe==0.10.9
+numpy==1.24.3
+screeninfo==0.8.1
+pynput==1.7.6
+pywin32>=305
