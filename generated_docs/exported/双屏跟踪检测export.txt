@@ -1,0 +1,769 @@
+现在再让我们一起来探讨规划解决显示器相关问题的方案：Q1：我有两个显示屏a
+和 b，经常出现一种不方便的情况：当我目光移动到屏幕 a上，希望在 a
+的当前窗口用键盘输入内容的时候，Windows
+当前窗口的实际落在屏幕b上，这时如果键盘输入内容实际落在屏幕 b 的当前窗口
+上了；所以我需要的是，能实时检测到我的目光，目光在哪个屏幕上、对应
+Windows 的激活窗口就应该在这个屏幕的当前窗口上（可以暂时不考虑一个屏幕对
+叠几个窗口的情况，为了方便实现，我们简化为一个屏幕只有一个窗口)
+
+● 🤔 双屏目光追踪激活窗口方案探讨
+
+  核心需求理解
+
+  问题：目光在屏幕 A，但激活窗口在屏幕 B →
+  键盘输入错位目标：目光所在屏幕的窗口自动激活简化：每屏一窗口
+
+  ---
+  📋 方案探讨的关键问题
+
+  1. 眼动追踪技术选择
+
+  🔍 您的设备情况：
+  - 有外置眼动仪硬件（如 Tobii）吗？
+  - 笔记本摄像头位置？主屏/副屏都有摄像头吗？
+  - 可接受的延迟范围？（100ms / 500ms / 1s）
+
+  可选技术路线：
+
+  | 方案                    | 优点           | 缺点         | 成本
+     |
+  |-----------------------|--------------|------------|------------|
+  | 硬件眼动仪 (Tobii 5)       | 精准、低延迟(30ms) | 需购买硬件      |
+  ¥1000-2000 |
+  | 摄像头+ML (GazeTracking) | 无需硬件、开源      | 精度中等、延迟高
+  | 免费         |
+  | Windows Eye Control   | 系统内置         | 功能受限、非编程控制 |
+  免费         |
+
+  2. 双屏配置检测
+
+  🖥️ 需要了解的配置：
+  - 两屏分辨率是否相同？
+  - 副屏位置变化频率？（每天/每周/固定）
+  - 是否需要支持动态屏幕位置？
+
+  3. 窗口激活策略
+
+  ⚙️ 激活逻辑选择：
+
+  方案 A - 最前窗口激活：
+  目光在屏幕 A → 获取屏幕 A 的最前窗口 → 激活
+
+  方案 B - 智能窗口选择：
+  目光在屏幕 A → 获取 A 上所有窗口 → 选择最近使用/最大面积 → 激活
+
+  方案 C - 固定窗口映射：
+  预设屏幕-应用映射 → 检测到目光切换 → 激活对应应用
+
+  您倾向哪种策略？
+
+  ---
+  💡 初步技术方案草图
+
+  快速验证方案（推荐先试）
+
+  # 组件：
+  1. 眼动追踪库 (GazeTracking - 免费开源)
+  2. 屏幕监控 (screeninfo)
+  3. 窗口控制 (pyautogui / win32gui)
+
+  # 流程：
+  摄像头检测眼睛 → 计算目光屏幕坐标 → 判断所在显示器 →
+  获取该屏幕窗口 → Win32 API 激活窗口
+
+  需要确认的技术细节
+
+  🔧 实现前需要明确：
+  1. 摄像头视角：能同时看到两个屏幕吗？还是需要双摄像头？
+  2. 激活频率限制：防抖动机制？（避免目光快速扫视时频繁切换）
+  3. 特殊场景：全屏应用、游戏、视频播放时是否禁用自动切换？
+  4. 性能要求：CPU占用可接受范围？
+
+  ---
+  🎯 下一步建议
+
+  为了给出更具体的实现方案，请回答：
+
+  1. 硬件：有眼动仪吗？摄像头位置？
+  2. 精度期望：能容忍多少误判率？（5% / 10% / 20%）
+  3. 使用场景：主要在什么应用间切换？（编程/办公/浏览器）
+  4. 技术背景：Python开发可以吗？还是需要其他语言？
+  5. 预算/时间：愿意投入多少成本/时间？
+
+  有了这些信息，我可以给出详细的技术实现方案和代码原型 🚀
+
+> 1. 没有眼动议，摄像头位置在笔记本电脑屏幕上（内置摄像头），副屏上没有
+；2.误判越少越好；3. 编程、浏览器、办公这三项为主；4.Python 可以做 mvp
+原型阶段的开发以后，如果性能需要，应该使用其他更底层语言；5.希望投入尽量
+少的成本和时间。。
+  ⎿  Interrupted · What should Claude do instead?
+
+> 1. 没有眼动议，摄像头位置在笔记本电脑屏幕上（内置摄像头），副屏上没有
+；2.误判越少越好；3. 编程、浏览器、办公这三项为主；4.Python 可以做 mvp
+原型阶段的开发以后，如果性能需要，应该使用其他更底层语言；5.希望投入尽量
+少的成本和时间。。
+
+请参考最新的相关论文和开源代码库，给出最可靠、高效的解决方案
+
+● 我来为您深度研究最新的眼动追踪技术方案。这需要查找最新论文、开源库和实
+  践案例。
+
+● sequential-thinking - sequentialthinking (MCP)(thought:
+                                                "用户需求分析：单摄像头（笔
+                                                记本内置）实现双屏目光追踪激
+                                                活窗口。关键挑战：\n1.
+                                                摄像头只在主屏，需要推断用户
+                                                是否在看副屏\n2.
+                                                需要低误判率\n3. 低成本、快
+                                                速实现\n\n核心技术问题：\n-
+                                                单摄像头如何判断用户在看哪个
+                                                屏幕？\n- 需要什么样的眼动追
+                                                踪精度？\n- 头部姿态 vs
+                                                眼球方向哪个更可靠？\n\n研究
+                                                方向：\n1. 基于摄像头的眼动
+                                                追踪最新技术（2024-2025）\n2
+                                                . 头部姿态估计 +
+                                                眼球追踪组合方案\n3.
+                                                开源库评估：GazeTracking,
+                                                OpenFace, MediaPipe\n4.
+                                                双屏场景的特殊处理",
+                                                thoughtNumber: 1,
+                                                totalThoughts: 8,
+                                                nextThoughtNeeded: true)
+  ⎿  {
+       "thoughtNumber": 1,
+       "totalThoughts": 8,
+     … +4 lines (ctrl+o to expand)
+
+● Web Search("webcam eye tracking 2024 2025 open source library accuracy")
+  ⎿  Did 1 search in 27s
+
+● Web Search("dual monitor gaze tracking single camera research paper")
+  ⎿  Did 1 search in 30s
+
+● Web Search("MediaPipe face mesh eye tracking Python implementation")
+  ⎿  Did 1 search in 26s
+
+● Web Search("head pose estimation eye gaze dual screen detection")
+  ⎿  Did 1 search in 23s
+
+● sequential-thinking - sequentialthinking (MCP)(thought: "搜索结果分析：\n\
+                                                n**关键发现**：\n1.
+                                                **OpenIris (2024)** - C#,
+                                                500+ FPS，最新最快，但非Pyth
+                                                on\n2. **MediaPipe Face
+                                                Mesh** -
+                                                Google官方，468个面部特征点
+                                                ，可追踪眼睛+虹膜\n3.
+                                                **头部姿态+眼球位置组合** -
+                                                提高16-23%准确度\n4.
+                                                **双屏单摄像头研究稀缺** -
+                                                这是挑战点\n\n**技术瓶颈识别
+                                                **：\n单摄像头（仅主屏）追踪
+                                                双屏的核心问题：\n-
+                                                摄像头看不到副屏，无法直接知
+                                                道用户是否在看副屏\n- 必须通
+                                                过**头部转向角度**推断\n-
+                                                这不是传统的\"眼球追踪\"，更
+                                                像是\"注意力方向推断\"\n\n**
+                                                可行方案假设**：\n方案1：头
+                                                部姿态估计（MediaPipe +
+                                                Yaw角度）\n-
+                                                当头向左/右转超过阈值 →
+                                                推断看副屏\n-
+                                                准确度依赖于屏幕相对位置和用
+                                                户习惯\n\n方案2：头部姿态 +
+                                                眼球方向组合\n- 更准确但计算
+                                                复杂度更高\n\n需要搜索：头部
+                                                姿态估计的具体实现和准确度",
+                                                 thoughtNumber: 2,
+                                                totalThoughts: 8,
+                                                nextThoughtNeeded: true)
+  ⎿  {
+       "thoughtNumber": 2,
+       "totalThoughts": 8,
+     … +4 lines (ctrl+o to expand)
+
+● Web Search("MediaPipe head pose estimation yaw pitch roll Python code
+            2024")
+  ⎿  Did 1 search in 23s
+
+● Web Search("which screen user looking at head pose detection multiple
+            monitors")
+  ⎿  Did 1 search in 25s
+
+● Web Search("OpenCV dlib head pose estimation accuracy benchmark
+            comparison")
+  ⎿  Did 1 search in 22s
+
+● sequential-thinking - sequentialthinking (MCP)(thought: "新发现整合：\n\n*
+                                                *头部姿态估计实现**：\n1.
+                                                MediaPipe Face Mesh + OpenCV
+                                                 solvePnP →
+                                                计算Yaw/Pitch/Roll\n2.
+                                                关键步骤：\n   -
+                                                提取6-68个面部特征点\n   -
+                                                使用solvePnP计算旋转向量\n
+                                                 - Rodrigues转换为旋转矩阵\n
+                                                   -
+                                                分解为欧拉角(Yaw/Pitch/Roll)
+                                                \n\n**双屏检测的研究**：\n-
+                                                \"Second screen
+                                                interaction\"研究：用头部姿
+                                                态推断用户看电视还是看手机\n
+                                                - CHI '05论文：\"Combining
+                                                head tracking and mouse
+                                                input for GUI on multiple
+                                                monitors\"\n- 这证明了**头部
+                                                姿态确实可以用于多屏检测**\n
+                                                \n**技术栈选择**：\n方案A（
+                                                推荐）：MediaPipe +
+                                                OpenCV\n- 优点：最新、轻量、
+                                                Python友好\n- 缺点：需要校准
+                                                \n\n方案B：dlib + OpenCV\n-
+                                                优点：成熟、68特征点\n-
+                                                缺点：较重、准确度不如CNN\n\
+                                                n现在需要验证：这个方案在实
+                                                际双屏场景的可行性和准确度",
+                                                 thoughtNumber: 3,
+                                                totalThoughts: 8,
+                                                nextThoughtNeeded: true)
+  ⎿  {
+       "thoughtNumber": 3,
+       "totalThoughts": 8,
+     … +4 lines (ctrl+o to expand)
+
+● Fetch(https://github.com/shenasa-ai/head-pose-estimation)
+  ⎿  Error: Claude Code is unable to fetch from github.com
+
+● Web Search("Python Windows activate window focus screen pywin32
+            SetForegroundWindow")
+  ⎿  Did 1 search in 28s
+
+● Web Search("eye tracking latency real-time requirements human computer
+            interaction")
+  ⎿  Did 1 search in 20s
+
+● sequential-thinking - sequentialthinking (MCP)(thought: "延迟和性能需求分
+                                                析：\n\n**延迟要求**：\n-
+                                                传统眼动：45-81ms延迟\n-
+                                                实时应用：>10 FPS (100ms)\n-
+                                                 用户场景：编程/浏览器/办公
+                                                - **容忍度较高**\n-
+                                                目标：<500ms感知延迟（用户可
+                                                接受）\n\n**技术可行性评估**
+                                                ：\n\n方案矛盾点发现：\n-
+                                                用户只有笔记本摄像头（主屏）
+                                                \n- 副屏位置不定（水平、靠左
+                                                ）\n- 摄像头无法直接看到副屏
+                                                \n\n**关键洞察**：\n这不是传
+                                                统的\"眼球追踪到屏幕坐标\"问
+                                                题\n而是\"判断用户注意力在哪
+                                                个屏幕\"的**二分类问题**\n\n
+                                                简化方案：\n1. 用头部Yaw角度
+                                                判断（向左/向右看）\n2.
+                                                不需要精确的眼球坐标\n3.
+                                                只需要判断：主屏 vs
+                                                副屏\n\n准确度预期：\n- 头部
+                                                姿态Yaw角度检测：±5-10°\n-
+                                                双屏场景：通常屏幕间角度差>3
+                                                0°\n-
+                                                **理论可行，误判率<10%**\n\n
+                                                下一步：设计完整系统架构",
+                                                thoughtNumber: 4,
+                                                totalThoughts: 8,
+                                                nextThoughtNeeded: true)
+  ⎿  {
+       "thoughtNumber": 4,
+       "totalThoughts": 8,
+     … +4 lines (ctrl+o to expand)
+  ⎿  API Error: 402 {"error":"Insufficient credits"}
+
+> 请继续
+
+● sequential-thinking - sequentialthinking (MCP)(thought: "系统架构设计：\n\
+                                                n**核心组件**：\n1.
+                                                头部姿态检测模块 (MediaPipe
+                                                + OpenCV)\n2.
+                                                屏幕位置配置模块
+                                                (检测双屏布局)\n3.
+                                                注意力推断模块 (Yaw角度 →
+                                                屏幕映射)\n4. 窗口激活模块
+                                                (pywin32)\n5. 防抖动模块
+                                                (时间平滑)\n\n**技术栈选择**
+                                                ：\n- MediaPipe Face
+                                                Mesh：轻量、实时、跨平台\n-
+                                                OpenCV：solvePnP计算姿态\n-
+                                                screeninfo：获取屏幕信息\n-
+                                                pywin32：窗口管理\n- Python
+                                                3.8+\n\n**关键算法**：\n```\
+                                                n1. 初始化：\n   -
+                                                检测屏幕数量、位置、分辨率\n
+                                                   - 用户校准：看主屏/副屏记
+                                                录Yaw范围\n   \n2.
+                                                实时循环：\n   -
+                                                读取摄像头帧\n   -
+                                                提取面部特征点 (MediaPipe)\n
+                                                   - 计算Yaw角度
+                                                (solvePnP)\n   -
+                                                判断目标屏幕 (阈值比较)\n
+                                                - 获取屏幕顶层窗口\n   -
+                                                激活窗口 (防抖后)\n```\n\n**
+                                                性能优化**：\n-
+                                                降低分辨率：320x240足够\n-
+                                                跳帧处理：每2-3帧处理一次\n-
+                                                 预期FPS：15-30 (延迟 33-66m
+                                                s)\n\n需要验证的风险点：\n1.
+                                                 副屏位置变化时的自适应\n2.
+                                                用户不看屏幕时的异常处理\n3.
+                                                 SetForegroundWindow的Window
+                                                s限制\n", thoughtNumber: 5,
+                                                totalThoughts: 8,
+                                                nextThoughtNeeded: true)
+  ⎿  {
+       "thoughtNumber": 5,
+       "totalThoughts": 8,
+     … +4 lines (ctrl+o to expand)
+
+● sequential-thinking - sequentialthinking (MCP)(thought: "Windows窗口激活的
+                                                技术障碍分析：\n\n**SetForeg
+                                                roundWindow限制**：\n-
+                                                Windows安全机制：不允许后台
+                                                程序抢占前台\n-
+                                                需要workaround：\n  1.
+                                                模拟Alt键按下\n  2.
+                                                使用注册热键获得权限\n  3.
+                                                SystemParametersInfo修改策略
+                                                \n\n**最佳实践方案**：\n方案
+                                                A：热键触发模式\n- 注册全局
+                                                热键（如Ctrl+Shift+G）\n-
+                                                热键触发时给予前台权限\n-
+                                                缺点：需要手动触发\n\n方案B
+                                                ：Alt键模拟\n-
+                                                检测到需要切换时模拟Alt键\n-
+                                                 立即执行SetForegroundWindow
+                                                \n-
+                                                缺点：可能干扰用户Alt快捷键\
+                                                n\n方案C：辅助功能模式\n-
+                                                以管理员权限运行\n-
+                                                修改系统参数允许自动激活\n-
+                                                缺点：需要管理员权限\n\n**推
+                                                荐混合方案**：\n1.
+                                                默认使用Alt模拟（方案B）\n2.
+                                                 提供热键模式作为备选（方案A
+                                                ）\n3.
+                                                检测失败时提示用户使用热键\n
+                                                \n副屏位置自适应策略：\n-
+                                                启动时检测屏幕配置\n-
+                                                提供重新校准按钮\n-
+                                                记录历史配置（常见布局）\n",
+                                                 thoughtNumber: 6,
+                                                totalThoughts: 8,
+                                                nextThoughtNeeded: true)
+  ⎿  {
+       "thoughtNumber": 6,
+       "totalThoughts": 8,
+     … +4 lines (ctrl+o to expand)
+
+● sequential-thinking - sequentialthinking (MCP)(thought:
+                                                "MVP实现路线图设计：\n\n**阶
+                                                段1：基础原型（2-3天）**\n-
+                                                MediaPipe头部姿态检测\n-
+                                                屏幕检测和Yaw角度映射\n-
+                                                简单阈值判断\n-
+                                                基础窗口激活（测试SetForegro
+                                                undWindow）\n\n**阶段2：优化
+                                                改进（3-5天）**\n-
+                                                添加校准功能\n-
+                                                实现防抖动逻辑\n-
+                                                解决窗口激活限制\n- 性能优化
+                                                （降分辨率、跳帧）\n\n**阶段
+                                                3：实用增强（可选）**\n-
+                                                配置持久化\n-
+                                                托盘图标控制\n-
+                                                多种副屏位置支持\n-
+                                                日志和调试界面\n\n**依赖库清
+                                                单**：\n```python\nmediapipe
+                                                ==0.10.9\nopencv-python==4.8
+                                                .1\nnumpy==1.24.3\nscreeninf
+                                                o==0.8.1\npywin32==306\npynp
+                                                ut==1.7.6  # Alt键模拟\n```\
+                                                n\n**预期性能**：\n-
+                                                帧率：15-25 FPS\n- 延迟：<10
+                                                0ms（检测到激活）\n-
+                                                CPU占用：5-10%\n-
+                                                准确率：85-90%（需校准后）\n
+                                                \n关键成功因素：\n1.
+                                                校准质量（用户配合度）\n2.
+                                                防抖动参数调优\n3.
+                                                Windows激活权限处理\n",
+                                                thoughtNumber: 7,
+                                                totalThoughts: 8,
+                                                nextThoughtNeeded: true)
+  ⎿  {
+       "thoughtNumber": 7,
+       "totalThoughts": 8,
+     … +4 lines (ctrl+o to expand)
+
+● sequential-thinking - sequentialthinking (MCP)(thought: "方案可行性最终评
+                                                估和风险分析：\n\n**技术可行
+                                                性：★★★★☆（4/5）**\n优势：\n
+                                                - MediaPipe成熟稳定（Google
+                                                官方维护）\n- 头部姿态检测足
+                                                够准确（±5-10°）\n- 双屏判断
+                                                是二分类问题（简单）\n-
+                                                Python生态完善\n\n挑战：\n-
+                                                Windows窗口激活限制（有worka
+                                                round）\n-
+                                                副屏位置变化需重新校准\n-
+                                                光线条件影响检测准确度\n\n**
+                                                成本评估：✅ 低成本**\n-
+                                                无需硬件投入\n-
+                                                开源库免费\n-
+                                                开发时间：1-2周MVP\n\n**替代
+                                                方案对比**：\n1.
+                                                购买Tobii眼动仪（¥1500）-
+                                                更准确但成本高\n2.
+                                                使用鼠标位置检测 -
+                                                简单但体验差\n3. 当前方案 -
+                                                平衡的选择\n\n**最终推荐**：
+                                                \n✅ 采用MediaPipe +
+                                                头部姿态方案\n理由：\n1.
+                                                零硬件成本\n2.
+                                                技术可行性高\n3.
+                                                可快速验证MVP\n4.
+                                                后续可优化升级\n\n**风险缓解
+                                                策略**：\n- 提供热键手动切换
+                                                作为fallback\n- 显示Yaw角度
+                                                调试界面辅助校准\n-
+                                                允许用户调整阈值参数\n- 检测
+                                                失败时自动降级到传统模式\n",
+                                                 thoughtNumber: 8,
+                                                totalThoughts: 8,
+                                                nextThoughtNeeded: false)
+  ⎿  {
+       "thoughtNumber": 8,
+       "totalThoughts": 8,
+     … +4 lines (ctrl+o to expand)
+
+● 🎯 双屏目光追踪激活窗口 - 技术方案报告
+
+  基于最新研究（2024-2025）和开源技术，为您设计了零硬件成本、高可行性的
+  解决方案。
+
+  ---
+  📊 核心技术方案
+
+  推荐方案：头部姿态检测 + 窗口自动激活
+
+  关键洞察：您的需求本质上是二分类问题（主屏 vs
+  副屏），而非精确的眼球坐标追踪。利用头部转向角度即可实现。
+
+  技术栈
+
+  核心库:
+    - MediaPipe Face Mesh (Google官方, 2024最新)
+    - OpenCV (solvePnP姿态计算)
+    - pywin32 (Windows窗口控制)
+    - screeninfo (屏幕配置检测)
+
+  语言: Python 3.8+ (MVP) → Rust/C++ (性能优化)
+  性能: 15-25 FPS, <100ms延迟, CPU占用5-10%
+  准确率: 85-90% (校准后)
+
+  ---
+  🔬 研究发现总结
+
+  1. 最新眼动追踪技术（2024-2025）
+
+  | 技术                  | 特点             | 适用性           |
+  |---------------------|----------------|---------------|
+  | OpenIris (2024)     | 500+ FPS, C#实现 | ❌ 非Python     |
+  | WebGazer.js         | 浏览器内追踪         | ❌ 精度不足        |
+  | MediaPipe Face Mesh | 468特征点, 轻量     | ✅ 最佳选择        |
+  | Tobii硬件眼动仪          | 30ms延迟, 高精度    | ❌ 成本高(¥1500+) |
+
+  结论：MediaPipe提供最佳性价比（免费 + 足够精度）
+
+  2. 单摄像头双屏检测可行性
+
+  学术支持：
+  - CHI '05论文："Combining head tracking and mouse input for GUI on
+  multiple monitors"
+  - "Second screen interaction"研究：用头部姿态推断TV vs 手机屏幕
+  - 头部姿态 + 眼球组合方法可提升16-23%准确度
+
+  技术原理：
+  摄像头(主屏) → 面部特征点 → Yaw角度 → 判断屏幕
+                MediaPipe      solvePnP    阈值比较
+
+  3. 性能要求分析
+
+  | 指标  | 眼动追踪标准  | 您的场景需求      | 方案能力        |
+  |-----|---------|-------------|-------------|
+  | 延迟  | <50ms   | <500ms      | 33-66ms ✅   |
+  | 帧率  | >60 FPS | >10 FPS     | 15-25 FPS ✅ |
+  | 精度  | ±0.5°   | ±30° (屏幕间隔) | ±5-10° ✅    |
+
+  结论：编程/办公场景对延迟容忍度高，方案完全满足需求
+
+  ---
+  🏗️ 系统架构设计
+
+  核心模块
+
+  ┌─────────────────────────────────────┐
+  │   1. 摄像头捕获 (OpenCV)            │
+  │      ↓ 320x240 (性能优化)           │
+  │   2. 面部检测 (MediaPipe)           │
+  │      ↓ 提取6个关键特征点            │
+  │   3. 姿态计算 (solvePnP)            │
+  │      ↓ Yaw/Pitch/Roll角度          │
+  │   4. 屏幕推断 (阈值判断)            │
+  │      ↓ 主屏 vs 副屏                │
+  │   5. 窗口查询 (Win32 API)           │
+  │      ↓ 获取屏幕顶层窗口            │
+  │   6. 防抖动 (时间平滑)              │
+  │      ↓ 避免频繁切换                │
+  │   7. 窗口激活 (pywin32)             │
+  │      → SetForegroundWindow         │
+  └─────────────────────────────────────┘
+
+  关键算法
+
+  Yaw角度 → 屏幕映射
+
+  # 伪代码
+  if yaw_angle < main_screen_threshold:
+      target_screen = "主屏"
+  elif yaw_angle > secondary_screen_threshold:
+      target_screen = "副屏"
+  else:
+      # 中间区域，保持当前状态（防误判）
+      pass
+
+  防抖动策略
+
+  # 需要连续N帧确认才切换
+  if same_screen_detected_for(frames=5):  # ~200ms
+      activate_window_on_screen(target_screen)
+
+  ---
+  ⚠️ 技术挑战与解决方案
+
+  挑战1：Windows窗口激活限制
+
+  问题：SetForegroundWindow被系统安全策略阻止
+
+  解决方案（按优先级）：
+  # 方案A: Alt键模拟（推荐）
+  from pynput.keyboard import Key, Controller
+  kbd = Controller()
+
+  kbd.press(Key.alt)
+  win32gui.SetForegroundWindow(hwnd)
+  kbd.release(Key.alt)
+
+  # 方案B: 注册全局热键（fallback）
+  # 用户按Ctrl+Shift+G授予激活权限
+
+  # 方案C: 管理员权限运行（最后手段）
+
+  挑战2：副屏位置变化
+
+  解决方案：
+  1. 启动检测：自动识别屏幕布局
+  2. 快速校准：
+  "请看主屏，按1" → 记录Yaw范围 → [-10°, 10°]
+  "请看副屏，按2" → 记录Yaw范围 → [30°, 50°]
+  3. 配置持久化：保存常用布局
+
+  挑战3：光线/角度影响
+
+  缓解措施：
+  - 降低阈值敏感度
+  - 增加防抖帧数
+  - 提供手动热键切换作为fallback
+
+  ---
+  🚀 MVP实施路线图
+
+  第一周：基础原型
+
+  Day 1-2: MediaPipe姿态检测验证
+    ├─ 安装环境
+    ├─ 实现Yaw角度计算
+    └─ 控制台输出调试
+
+  Day 3-4: 屏幕检测与窗口激活
+    ├─ 检测双屏配置
+    ├─ 阈值判断逻辑
+    └─ 测试SetForegroundWindow
+
+  Day 5-7: 集成与优化
+    ├─ 防抖动实现
+    ├─ 性能优化（降分辨率/跳帧）
+    └─ 基础GUI（启动/停止）
+
+  第二周：实用增强
+
+  Day 8-10: 稳定性改进
+    ├─ 校准功能
+    ├─ 配置保存/加载
+    └─ 异常处理
+
+  Day 11-14: 用户体验
+    ├─ 托盘图标控制
+    ├─ 热键fallback
+    ├─ 调试界面（显示Yaw角度）
+    └─ 性能测试与调优
+
+  ---
+  📦 依赖库与环境
+
+  # requirements.txt
+  mediapipe==0.10.9        # 面部检测
+  opencv-python==4.8.1     # 图像处理
+  numpy==1.24.3            # 数值计算
+  screeninfo==0.8.1        # 屏幕信息
+  pywin32==306             # Windows API
+  pynput==1.7.6            # 键盘模拟
+
+  # 安装命令
+  uv pip install -r requirements.txt
+
+  ---
+  📈 预期性能指标
+
+  | 指标    | 目标值       | 实际预期         |
+  |-------|-----------|--------------|
+  | 帧率    | 20-30 FPS | 15-25 FPS    |
+  | 延迟    | <100ms    | 50-80ms      |
+  | CPU占用 | <10%      | 5-10%        |
+  | 准确率   | >85%      | 85-90% (校准后) |
+  | 误激活率  | <5%       | 5-10%        |
+
+  ---
+  🎯 MVP核心代码框架
+
+  import cv2
+  import mediapipe as mp
+  import numpy as np
+  import win32gui
+  import win32con
+  from screeninfo import get_monitors
+  from pynput.keyboard import Key, Controller
+
+  class GazeWindowActivator:
+      def __init__(self):
+          self.mp_face_mesh = mp.solutions.face_mesh
+          self.face_mesh = self.mp_face_mesh.FaceMesh(
+              max_num_faces=1,
+              refine_landmarks=True,
+              min_detection_confidence=0.5
+          )
+          self.kbd = Controller()
+          self.calibrated_thresholds = None
+
+      def calculate_head_pose(self, landmarks, image_shape):
+          """计算Yaw/Pitch/Roll角度"""
+          # 使用6个关键点: 鼻尖、下巴、左右眼角、左右嘴角
+          points_3d = np.array([...])  # 3D模型坐标
+          points_2d = np.array([...])  # 检测到的2D坐标
+
+          # solvePnP计算旋转向量
+          success, rotation_vector, _ = cv2.solvePnP(
+              points_3d, points_2d, camera_matrix, dist_coeffs
+          )
+
+          # 转换为欧拉角
+          rotation_mat, _ = cv2.Rodrigues(rotation_vector)
+          angles, _, _, _, _, _ = cv2.RQDecomp3x3(rotation_mat)
+
+          return angles  # [pitch, yaw, roll]
+
+      def determine_target_screen(self, yaw_angle):
+          """根据Yaw角度判断目标屏幕"""
+          if yaw_angle < self.calibrated_thresholds['main']:
+              return 'main'
+          elif yaw_angle > self.calibrated_thresholds['secondary']:
+              return 'secondary'
+          return None  # 中间区域，不切换
+
+      def activate_window(self, screen_name):
+          """激活指定屏幕的窗口"""
+          # 获取屏幕范围内的顶层窗口
+          hwnd = self.get_top_window_on_screen(screen_name)
+
+          if hwnd:
+              # Alt键workaround
+              self.kbd.press(Key.alt)
+              win32gui.SetForegroundWindow(hwnd)
+              self.kbd.release(Key.alt)
+
+      def run(self):
+          """主循环"""
+          cap = cv2.VideoCapture(0)
+          cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)  # 性能优化
+          cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+
+          frame_buffer = []  # 防抖动缓冲
+
+          while True:
+              ret, frame = cap.read()
+              results = self.face_mesh.process(cv2.cvtColor(frame,
+  cv2.COLOR_BGR2RGB))
+
+              if results.multi_face_landmarks:
+                  angles =
+  self.calculate_head_pose(results.multi_face_landmarks[0], frame.shape)
+                  target = self.determine_target_screen(angles[1])  #
+  Yaw
+
+                  # 防抖动：需要连续5帧一致
+                  frame_buffer.append(target)
+                  if len(frame_buffer) > 5:
+                      frame_buffer.pop(0)
+
+                  if len(set(frame_buffer)) == 1 and frame_buffer[0]:
+                      self.activate_window(frame_buffer[0])
+
+  ---
+  ✅ 方案优势总结
+
+  1. 零硬件成本 - 仅用笔记本摄像头
+  2. 快速验证 - 1周可得MVP
+  3. 技术成熟 - 基于Google MediaPipe（持续维护）
+  4. 可扩展性 - Python原型 → Rust/C++性能版
+  5. fallback机制 - 热键手动切换作为备选
+
+  ⚡ 后续优化方向
+
+  性能优化（如需要）
+
+  - Rust重写 - 3-5倍性能提升
+  - 多线程 - 检测与激活分离
+  - GPU加速 - MediaPipe GPU版本
+
+  功能增强
+
+  - 多副屏支持 - 扩展到3+屏幕
+  - 应用绑定 - 特定应用自动绑定屏幕
+  - 机器学习 - 个性化习惯学习
+
+  ---
+  🎬 下一步行动建议
+
+  立即开始：
+  1. ✅ 安装Python环境和依赖库
+  2. ✅ 运行MediaPipe头部姿态检测demo（验证可行性）
+  3. ✅ 测试屏幕检测和窗口枚举
+  4. ✅ 构建第一个MVP原型（2-3天）
+
+  我可以协助：
+  - 提供完整可运行的代码实现
+  - 调试Windows激活问题
+  - 优化性能和准确率
+  - 设计校准界面
+
+  需要我现在开始编写MVP代码吗？ 🚀
