@@ -15,7 +15,7 @@ class HotkeyManager:
         self.running = False
         self.callbacks = {}
         self.thread = None
-        self.poll_interval = 0.05  # 50ms polling interval
+        self.poll_interval = 0.015  # 15ms polling interval for faster response
 
     def register_hotkey(self, key_name, callback):
         """
@@ -39,19 +39,23 @@ class HotkeyManager:
 
     def _monitor_loop(self):
         """Main monitoring loop (runs in background thread)"""
-        prev_capslock_state = win32api.GetKeyState(win32con.VK_CAPITAL)
+        # Use GetAsyncKeyState for global key state detection
+        # Check bit 0 (0x0001) for toggle state (ON/OFF)
+        prev_capslock_state = win32api.GetAsyncKeyState(win32con.VK_CAPITAL) & 0x0001
 
         while self.running:
             try:
-                # Check CapsLock state
-                curr_state = win32api.GetKeyState(win32con.VK_CAPITAL)
+                # Check global CapsLock toggle state
+                curr_state = win32api.GetAsyncKeyState(win32con.VK_CAPITAL) & 0x0001
 
                 # Detect state change
                 if curr_state != prev_capslock_state:
                     if curr_state == 1:  # CapsLock ON
+                        print("🔔 CapsLock ON detected (global)")
                         if 'capslock_on' in self.callbacks:
                             self.callbacks['capslock_on']()
                     else:  # CapsLock OFF
+                        print("🔔 CapsLock OFF detected (global)")
                         if 'capslock_off' in self.callbacks:
                             self.callbacks['capslock_off']()
 

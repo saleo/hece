@@ -18,35 +18,50 @@ class OverlayWindow:
         self.labels = []
         self.previous_focus = None
         self.label_size = (35, 26)  # Width x Height of label box
+        self.screen_offset_x = 0  # Virtual screen offset
+        self.screen_offset_y = 0
 
     def create(self):
-        """Create fullscreen transparent overlay window"""
+        """Create fullscreen transparent overlay window spanning all monitors"""
         # Save current focus window
         self.previous_focus = win32gui.GetForegroundWindow()
 
         # Create transparent fullscreen window
         self.root = tk.Tk()
+
+        # Performance: Batch window setup to reduce redraws
+        self.root.withdraw()  # Hide window during setup
         self.root.attributes('-alpha', 0.3)  # 30% transparency
         self.root.attributes('-topmost', True)  # Always on top
         self.root.overrideredirect(True)  # No window borders
 
-        # Fullscreen
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
-        self.root.geometry(f"{screen_width}x{screen_height}+0+0")
+        # Get virtual screen bounds (all monitors combined)
+        virtual_screen_left = win32api.GetSystemMetrics(win32con.SM_XVIRTUALSCREEN)
+        virtual_screen_top = win32api.GetSystemMetrics(win32con.SM_YVIRTUALSCREEN)
+        virtual_screen_width = win32api.GetSystemMetrics(win32con.SM_CXVIRTUALSCREEN)
+        virtual_screen_height = win32api.GetSystemMetrics(win32con.SM_CYVIRTUALSCREEN)
 
-        # Create canvas
+        # Store offset for coordinate adjustment
+        self.screen_offset_x = virtual_screen_left
+        self.screen_offset_y = virtual_screen_top
+
+        # Position window to cover entire virtual desktop
+        self.root.geometry(f"{virtual_screen_width}x{virtual_screen_height}+{virtual_screen_left}+{virtual_screen_top}")
+
+        # Create canvas with performance optimizations
         self.canvas = tk.Canvas(
             self.root,
             bg='black',
-            highlightthickness=0
+            highlightthickness=0,
+            bd=0  # No border for faster rendering
         )
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
         # Bind ESC key to exit
         self.root.bind('<Escape>', lambda e: self.destroy())
 
-        # Force focus to capture keyboard input
+        # Show window and force focus
+        self.root.deiconify()  # Show window after setup complete
         self.root.focus_force()
 
         print("✅ Overlay window created")
@@ -71,19 +86,25 @@ class OverlayWindow:
         for i, (elem, label) in enumerate(zip(elements, labels)):
             rect = elem['rect']
 
-            # Label position (to the left of element)
-            x = rect.left - self.label_size[0] - 5
-            y = rect.top
+            # Convert screen coordinates to canvas coordinates
+            # Canvas origin is at virtual screen top-left
+            canvas_x = rect.left - self.screen_offset_x
+            canvas_y = rect.top - self.screen_offset_y
 
-            # Ensure label is on screen
-            if x < 0:
-                x = rect.right + 5
-            if y < 0:
-                y = 0
+            # Label position (to the left of element)
+            label_x = canvas_x - self.label_size[0] - 5
+            label_y = canvas_y
+
+            # Ensure label is visible - check against element bounds, not screen bounds
+            if label_x < canvas_x - 200:  # Too far left
+                label_x = canvas_x + (rect.width() if hasattr(rect, 'width') else 50) + 5
+            if label_y < 0:
+                label_y = 0
 
             # Draw label background
             bg_id = self.canvas.create_rectangle(
-                x, y, x + self.label_size[0], y + self.label_size[1],
+                label_x, label_y,
+                label_x + self.label_size[0], label_y + self.label_size[1],
                 fill='yellow',
                 outline='black',
                 width=2
@@ -91,8 +112,8 @@ class OverlayWindow:
 
             # Draw label text
             text_id = self.canvas.create_text(
-                x + self.label_size[0] // 2,
-                y + self.label_size[1] // 2,
+                label_x + self.label_size[0] // 2,
+                label_y + self.label_size[1] // 2,
                 text=label.upper(),
                 font=label_font,
                 fill='black'
